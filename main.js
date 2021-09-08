@@ -127,6 +127,14 @@ class Field {
         return fieldCharacter;
     }
 
+    const randomHat = arr => {
+      let randomYOfHat = Math.floor(Math.random() * height);
+      let randomXOfHat = Math.floor(Math.random() * width);
+
+      arr[randomYOfHat][randomXOfHat] = hat;
+      return arr;
+    }
+
     const plainField = () => {
         //Create the array that represent the field when taken in height and width
         let resultArr =[];
@@ -138,18 +146,9 @@ class Field {
             resultArr.push(widthArr);
         }
 
-        //Random position for the Hat
-        let randomYOfHat = Math.floor(Math.random() * height);
-        let randomXOfHat = Math.floor(Math.random() * width);
-        while (randomXOfHat === 0 && randomYOfHat === 0) {
-            randomYOfHat = Math.floor(Math.random() * height);
-            randomXOfHat = Math.floor(Math.random() * width);
-        }
-        resultArr[randomYOfHat][randomXOfHat] = hat;
-
         //User start at the top left position
         resultArr[0][0] = pathCharacter;
-        return resultArr;
+        return randomHat(resultArr);
     }
 
     const checkPercentage = (arr) => {
