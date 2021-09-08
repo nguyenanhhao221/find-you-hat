@@ -67,6 +67,10 @@ class Field {
         this.field[this.y][this.x] = pathCharacter;
         stillPlaying = true;
         break;
+      case undefined:
+        console.log('You lost, you fall outside of the field');
+        stillPlaying = false;
+        break;
 
       default:
         break;
