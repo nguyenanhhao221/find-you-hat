@@ -5,6 +5,8 @@ const hole = 'O';
 const fieldCharacter = '░';
 const pathCharacter = '*';
 
+const isStillPlaying = true;
+
 class Field {
   constructor(field) {
     this.field =  field;
@@ -24,8 +26,8 @@ class Field {
   static generateField(height, width, percentageOfHole) {
 
     const fieldOrHole = () => {
-        let randomNumber = Math.floor(Math.random() * 2);
-        if (randomNumber === 0 ) {
+        let randomNumber = Math.floor(Math.random() * 100);
+        if (randomNumber <= percentageOfHole ) {
             return hole;
         } 
         return fieldCharacter;
@@ -46,28 +48,40 @@ class Field {
 
     const checkPercentage = (arr) => {
         let countOfHole = 0;
-        for (let i of arr) {
-            i.forEach(item => {
-                if (item === hole) {
-                    countOfHole++;
-                }
-            })
+        for (let item of arr) {
+            for (let index = 0; index < item.length; index++) {
+              if (item[index] ==  hole) {
+                countOfHole+=1;
+              }
+            }
         }
-        return countOfHole;
+        return Math.floor((countOfHole*100) / (width * height));
     };
     
     let blankField = plainField();
-    let actualHolePercent = 0;
-    while (actualHolePercent < percentageOfHole) {
+    let actualHolePercent = checkPercentage(blankField);
+    while (actualHolePercent > percentageOfHole) {
         blankField = plainField();
-        actualHolePercent = Math.floor((checkPercentage(blankField) * 100 / (width * height)));
+        actualHolePercent = checkPercentage(blankField);
     }
-
     return blankField;
   }
   
 }
 
-
-const myField = new Field(Field.generateField(10,10,30));
+const testHole = arr => {
+  let countOfHole = 0;
+  for (const item of arr) {
+    for (let i = 0; i < item.length; i++) {
+      if (item[i] == hole) {
+        countOfHole+=1;
+      }
+    }
+    
+  }
+  console.log(countOfHole);
+}
+const myField = new Field(Field.generateField(10,10,20));
+testHole(myField.field);
 console.log(myField.print());
+
