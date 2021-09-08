@@ -127,11 +127,11 @@ class Field {
         return fieldCharacter;
     }
 
-    const randomHat = arr => {
-      let randomYOfHat = Math.floor(Math.random() * height);
-      let randomXOfHat = Math.floor(Math.random() * width);
+    const randomHat = (arr, hatOrPath) => {
+      let randomY = Math.floor(Math.random() * height);
+      let randomX = Math.floor(Math.random() * width);
 
-      arr[randomYOfHat][randomXOfHat] = hat;
+      arr[randomY][randomX] = hatOrPath;
       return arr;
     }
 
@@ -146,9 +146,12 @@ class Field {
             resultArr.push(widthArr);
         }
 
-        //User start at the top left position
-        resultArr[0][0] = pathCharacter;
-        return randomHat(resultArr);
+        //Put random Hat position into the field
+        randomHat(resultArr,hat);
+        //Put random Path Character position into the field
+        randomHat(resultArr,pathCharacter);
+
+        return resultArr;
     }
 
     const checkPercentage = (arr) => {
@@ -176,7 +179,25 @@ class Field {
 
 const myField = new Field(Field.generateField(10,10,20));
 
+//Adjust random starter position
+const adjustStartPosition = fieldClass => {
+  let y = 0;
+  let x = 0;
+  fieldClass.field.filter((item,index) => {
+    if (item.includes(pathCharacter)) {
+      y = index;
+      x = item.indexOf(pathCharacter);
+    }
+  })
+
+  fieldClass.x = x;
+  fieldClass.y = y;
+  return fieldClass;
+  
+}
+
 const playGame = myField => {
+  adjustStartPosition(myField);
   while (stillPlaying) {
     console.log(myField.print());
     myField.askUser();
