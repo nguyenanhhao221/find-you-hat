@@ -18,61 +18,8 @@ class Field {
     return this.field.map(row => row.join('')).join('\n');
   }
 
-  askUser() {
-    let move = prompt('Which direction to move (l to move left, r to move right, u to move up, d to move down)');
-
-    switch (move.toLowerCase()) {
-      case 'r':
-        if (this.field[this.y][this.x + 1] !== pathCharacter){
-          console.log('Move Right Forward');
-          this.x += 1;
-        } else {
-          console.log('Move Right Backward')
-          this.field[this.y][this.x] = fieldCharacter;
-          this.x +=1;
-        }
-        break;
-
-      case 'l':
-        if (this.field[this.y][this.x - 1] !== pathCharacter){
-          console.log('Move Left Forward');
-          this.x -= 1;
-        } else {
-          console.log('Move Left Backward')
-          this.field[this.y][this.x] = fieldCharacter;
-          this.x -=1;
-        }
-        break;
-      case 'u':
-        if (this.field[this.y - 1][this.x] !== pathCharacter) {
-          console.log('Move Up Toward')
-          this.y -= 1;
-        } else {
-          console.log('Move Up Backward')
-          this.field[this.y][this.x] = fieldCharacter;
-          this.y -=1;
-        }
-        break;
-    
-      case 'd':
-        if (this.field[this.y + 1][this.x] !== pathCharacter) {
-          console.log('Move Down Toward')
-          this.y += 1;
-        } else {
-          console.log('Move Down Backward')
-          this.field[this.y][this.x] = fieldCharacter;
-          this.y +=1;
-        }
-        break;
-    
-      default:
-        console.log("Please enter valid character 'l','r','u','d' ");
-        break;
-    }
-  }
-  
   checkIfWin() {
-    if (this.field[this.y] === undefined) {
+    if (this.field[this.y] == undefined) {
       console.log('You lost, you fall outside of the fieldy');
       stillPlaying = false;
     }
@@ -115,6 +62,68 @@ class Field {
       }
     }
   }
+
+  askAndMove() {
+    let move = prompt('Which direction to move (l to move left, r to move right, u to move up, d to move down)');
+    // Adjust the x,y right after user input
+    // Special case to check when user move backward or foward
+    // Also Check undefined because when user move out of the field, it lost, when user move out of the filed transfer to the checkIfWin function 
+    switch (move.toLowerCase()) {
+      case 'r':
+        if (this.field[this.y][this.x + 1] !== pathCharacter && this.field[this.y][this.x + 1] !== undefined){
+          console.log('Move Right Forward');
+          this.x += 1;
+        } else {
+          console.log('Move Right Backward')
+          this.field[this.y][this.x] = fieldCharacter;
+          this.x +=1;
+        }
+        this.checkIfWin();
+        break;
+
+      case 'l':
+        if (this.field[this.y][this.x - 1] !== pathCharacter && this.field[this.y][this.x - 1] !== undefined){
+          console.log('Move Left Forward');
+          this.x -= 1;
+        } else {
+          console.log('Move Left Backward')
+          this.field[this.y][this.x] = fieldCharacter;
+          this.x -=1;
+        }
+        break;
+      
+      case 'u':
+        if (this.field[this.y - 1] == undefined) {
+          this.y -=1;
+          // this.checkIfWin();
+        } else if (this.field[this.y - 1][this.x] !== pathCharacter || this.field[this.y - 1] !== undefined) {
+          console.log('Move Up Toward')
+          this.y -= 1;
+        } else {
+          console.log('Move Up Backward')
+          this.field[this.y][this.x] = fieldCharacter;
+          this.y -=1;
+        }
+        break;
+    
+      case 'd':
+        if (this.field[this.y + 1][this.x] !== pathCharacter && this.field[this.y + 1][this.x] !== undefined) {
+          console.log('Move Down Toward')
+          this.y += 1;
+        } else {
+          console.log('Move Down Backward')
+          this.field[this.y][this.x] = fieldCharacter;
+          this.y +=1;
+        }
+        break;
+    
+      default:
+        console.log("Please enter valid character 'l','r','u','d' ");
+        break;
+    }
+  }
+  
+  
   
 
   static generateField(height, width, percentageOfHole) {
@@ -125,6 +134,14 @@ class Field {
             return hole;
         } 
         return fieldCharacter;
+    }
+
+    const randomHat = (arr, hatOrPath) => {
+      let randomY = Math.floor(Math.random() * height);
+      let randomX = Math.floor(Math.random() * width);
+
+      arr[randomY][randomX] = hatOrPath;
+      return arr;
     }
 
     const plainField = () => {
@@ -138,17 +155,11 @@ class Field {
             resultArr.push(widthArr);
         }
 
-        //Random position for the Hat
-        let randomYOfHat = Math.floor(Math.random() * height);
-        let randomXOfHat = Math.floor(Math.random() * width);
-        while (randomXOfHat === 0 && randomYOfHat === 0) {
-            randomYOfHat = Math.floor(Math.random() * height);
-            randomXOfHat = Math.floor(Math.random() * width);
-        }
-        resultArr[randomYOfHat][randomXOfHat] = hat;
+        //Put random Hat position into the field
+        randomHat(resultArr,hat);
+        //Put random Path Character position into the field
+        randomHat(resultArr,pathCharacter);
 
-        //User start at the top left position
-        resultArr[0][0] = pathCharacter;
         return resultArr;
     }
 
@@ -177,10 +188,28 @@ class Field {
 
 const myField = new Field(Field.generateField(10,10,20));
 
+//Adjust random starter position
+const adjustStartPosition = fieldClass => {
+  let y = 0;
+  let x = 0;
+  fieldClass.field.filter((item,index) => {
+    if (item.includes(pathCharacter)) {
+      y = index;
+      x = item.indexOf(pathCharacter);
+    }
+  })
+
+  fieldClass.x = x;
+  fieldClass.y = y;
+  return fieldClass;
+  
+}
+
 const playGame = myField => {
+  adjustStartPosition(myField);
   while (stillPlaying) {
     console.log(myField.print());
-    myField.askUser();
+    myField.askAndMove();
     myField.checkIfWin();
   }
   console.log('Game over!');
