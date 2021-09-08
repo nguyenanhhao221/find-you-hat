@@ -163,7 +163,6 @@ class Field {
         }
         return Math.floor((countOfHole*100) / (width * height));
     };
-    
     let blankField = plainField();
     let actualHolePercent = checkPercentage(blankField);
     while (actualHolePercent > percentageOfHole) {
