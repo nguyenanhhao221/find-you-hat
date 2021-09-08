@@ -5,7 +5,7 @@ const hole = 'O';
 const fieldCharacter = '░';
 const pathCharacter = '*';
 
-const isStillPlaying = true;
+let stillPlaying = true;
 
 class Field {
   constructor(field) {
@@ -18,9 +18,59 @@ class Field {
     return this.field.map(row => row.join('')).join('\n');
   }
 
-  ask() {
+  askUser() {
     let move = prompt('Which direction to move (l to move left, r to move right, u to move up, d to move down)');
 
+    switch (move.toLowerCase()) {
+      case 'r':
+        console.log('Move Right')
+        this.x += 1;
+        break;
+
+      case 'l':
+        console.log('Move Left')
+        this.x -= 1;
+        break;
+      case 'u':
+        console.log('Move Up')
+        this.y -= 1;
+        break;
+    
+      case 'd':
+        console.log('Move Down')
+        this.y += 1;
+        break;
+    
+      default:
+        break;
+    }
+
+  }
+  
+  checkIfWin() {
+    if (this.field[this.y] == undefined) {
+      console.log('You lost, you fall outside of the field');
+      stillPlaying = false;
+    }
+
+    switch (this.field[this.y][this.x]) {
+      case hole:
+        console.log('You lost, you fall into the hole');
+        stillPlaying = false;
+        break;
+     case hat:
+        console.log('You found the hat, you win');
+        stillPlaying = false;
+        break;
+     case fieldCharacter:
+        console.log('Keep going and look for the hat');
+        this.field[this.y][this.x] = pathCharacter;
+        stillPlaying = true;
+        break;
+
+      default:
+        break;
+    }
   }
 
   static generateField(height, width, percentageOfHole) {
@@ -34,6 +84,7 @@ class Field {
     }
 
     const plainField = () => {
+        //Create the array that represent the field when taken in height and width
         let resultArr =[];
         for (let j = 0; j < height; j++) {
             let widthArr = [];
@@ -42,6 +93,17 @@ class Field {
             }
             resultArr.push(widthArr);
         }
+
+        //Random position for the Hat
+        let randomYOfHat = Math.floor(Math.random() * height);
+        let randomXOfHat = Math.floor(Math.random() * width);
+        while (randomXOfHat === 0 && randomYOfHat === 0) {
+            randomYOfHat = Math.floor(Math.random() * height);
+            randomXOfHat = Math.floor(Math.random() * width);
+        }
+        resultArr[randomYOfHat][randomXOfHat] = hat;
+
+        //User start at the top left position
         resultArr[0][0] = pathCharacter;
         return resultArr;
     }
@@ -69,19 +131,16 @@ class Field {
   
 }
 
-const testHole = arr => {
-  let countOfHole = 0;
-  for (const item of arr) {
-    for (let i = 0; i < item.length; i++) {
-      if (item[i] == hole) {
-        countOfHole+=1;
-      }
-    }
-    
-  }
-  console.log(countOfHole);
-}
-const myField = new Field(Field.generateField(10,10,20));
-testHole(myField.field);
-console.log(myField.print());
 
+const myField = new Field(Field.generateField(10,10,20));
+
+const playGame = myField => {
+  while (stillPlaying) {
+    console.log(myField.print());
+    myField.askUser();
+    myField.checkIfWin();
+  }
+  console.log('Game over!');
+}
+
+playGame(myField);
